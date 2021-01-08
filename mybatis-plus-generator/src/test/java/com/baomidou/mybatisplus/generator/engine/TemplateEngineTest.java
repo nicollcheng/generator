@@ -24,8 +24,7 @@ public class TemplateEngineTest {
     private void compatibleAssert(ConfigBuilder configBuilder) {
         VelocityTemplateEngine velocityTemplateEngine = new VelocityTemplateEngine();
         velocityTemplateEngine.setConfigBuilder(configBuilder);
-        TableInfo tableInfo = new TableInfo(new ConfigBuilder(new PackageConfig.Builder().build(), TableInfoTest.dataSourceConfig, new StrategyConfig(), null, null), "user");
-        tableInfo.processTable();
+        TableInfo tableInfo = new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), TableInfoTest.dataSourceConfig, new StrategyConfig(), null, null), "user").build();
         Map<String, Object> objectMap = velocityTemplateEngine.getObjectMap(tableInfo);
         Assertions.assertEquals(Boolean.TRUE, objectMap.get("enableCache"));
         Assertions.assertEquals(Boolean.TRUE, objectMap.get("baseResultMap"));

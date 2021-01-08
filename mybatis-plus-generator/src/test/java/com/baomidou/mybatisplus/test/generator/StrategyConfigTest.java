@@ -136,8 +136,7 @@ class StrategyConfigTest {
     @Test
     void entityNameConvertTest() {
         StrategyConfig strategyConfig;
-        TableInfo tableInfo = new TableInfo(new ConfigBuilder(new PackageConfig.Builder().build(), TableInfoTest.dataSourceConfig, new StrategyConfig(), null, null), "t_user");
-        tableInfo.setName("t_user");
+        TableInfo tableInfo = new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), TableInfoTest.dataSourceConfig, new StrategyConfig(), null, null), "t_user").build();
 
         strategyConfig = new StrategyConfig();
         Assertions.assertEquals("T_user", strategyConfig.getNameConvert().entityNameConvert(tableInfo));

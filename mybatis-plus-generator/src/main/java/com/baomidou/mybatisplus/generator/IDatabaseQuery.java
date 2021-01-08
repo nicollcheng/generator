@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -101,26 +101,24 @@ public abstract class IDatabaseQuery {
             boolean isInclude = strategyConfig.getInclude().size() > 0;
             boolean isExclude = strategyConfig.getExclude().size() > 0;
             //所有的表信息
-            List<TableInfo> tableList = new ArrayList<>();
+            Map<String, TableInfo.Builder> tableList = new HashMap<>();
 
-            //需要反向生成或排除的表信息
-            List<TableInfo> includeTableList = new ArrayList<>();
-            List<TableInfo> excludeTableList = new ArrayList<>();
             try {
                 dbQuery.query(dbQuery.tablesSql(), result -> {
                     String tableName = result.getStringResult(dbQuery.tableName());
                     if (StringUtils.isNotBlank(tableName)) {
-                        TableInfo tableInfo = new TableInfo(this.configBuilder, tableName);
+                        TableInfo.Builder tableBuilder = new TableInfo.Builder(configBuilder, tableName);
                         String tableComment = result.getTableComment();
                         // 跳过视图
                         if (!(strategyConfig.isSkipView() && "VIEW".equals(tableComment))) {
-                            tableInfo.setComment(tableComment);
-                            if (isInclude && strategyConfig.matchIncludeTable(tableName)) {
-                                includeTableList.add(tableInfo);
-                            } else if (isExclude && strategyConfig.matchExcludeTable(tableName)) {
-                                excludeTableList.add(tableInfo);
+                            tableBuilder.comment(tableComment);
+                            if (isExclude && !strategyConfig.matchExcludeTable(tableName)) {
+                                tableList.put(tableName, tableBuilder);
+                            } else if (isInclude && strategyConfig.matchIncludeTable(tableName)) {
+                                tableList.put(tableName, tableBuilder);
+                            } else {
+                                tableList.put(tableName, tableBuilder);
                             }
-                            tableList.add(tableInfo);
                         }
                     }
                 });
@@ -131,37 +129,32 @@ public abstract class IDatabaseQuery {
                         .filter(s -> !ConfigBuilder.matcherRegTable(s))
                         .collect(Collectors.toMap(String::toLowerCase, s -> s, (o, n) -> n));
                     // 将已经存在的表移除，获取配置中数据库不存在的表
-                    for (TableInfo tabInfo : tableList) {
+                    for (Map.Entry<String, TableInfo.Builder> entry : tableList.entrySet()) {
+                        String tableName = entry.getKey();
                         if (notExistTables.isEmpty()) {
                             break;
                         }
                         //解决可能大小写不敏感的情况导致无法移除掉
-                        notExistTables.remove(tabInfo.getName().toLowerCase());
+                        notExistTables.remove(tableName.toLowerCase());
                     }
                     if (notExistTables.size() > 0) {
                         LOGGER.warn("表[{}]在数据库中不存在！！！", String.join(StringPool.COMMA, notExistTables.values()));
                     }
-                    // 需要反向生成的表信息
-                    if (isExclude) {
-                        tableList.removeAll(excludeTableList);
-                    } else {
-                        tableList.clear();
-                        tableList.addAll(includeTableList);
-                    }
                 }
                 // 性能优化，只处理需执行表字段 github issues/219
-                tableList.forEach(this::convertTableFields);
+                List<TableInfo> tableInfoList = tableList.entrySet().stream().map(this::convertTableFields).collect(Collectors.toList());
 //                 数据库操作完成,释放连接对象
                 dbQuery.closeConnection();
-                return tableList;
+                return tableInfoList;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private void convertTableFields(@NotNull TableInfo tableInfo) {
+        private TableInfo convertTableFields(@NotNull Map.Entry<String, TableInfo.Builder> entry) {
             DbType dbType = this.dataSourceConfig.getDbType();
-            String tableName = tableInfo.getName();
+            String tableName = entry.getKey();
+            TableInfo.Builder builder = entry.getValue();
             try {
                 String tableFieldsSql = dbQuery.tableFieldsSql(tableName);
                 Set<String> h2PkColumns = new HashSet<>();
@@ -182,7 +175,7 @@ public abstract class IDatabaseQuery {
                     // 处理ID
                     if (isId) {
                         field.primaryKey(dbQuery.isKeyIdentity(result.getResultSet()));
-                        tableInfo.setHavePrimaryKey(true);
+                        builder.havePrimaryKey(true);
                         if (field.isKeyIdentityFlag() && (entity.getIdType() != null || globalConfig.getIdType() != null)) {
                             LOGGER.warn("当前表[{}]的主键为自增主键，会导致全局主键的ID类型设置失效!", tableName);
                         }
@@ -191,12 +184,12 @@ public abstract class IDatabaseQuery {
                         .setType(result.getStringResult(dbQuery.fieldType()))
                         .setComment(result.getFiledComment())
                         .setCustomMap(dbQuery.getCustomFields(result.getResultSet()));
-                    tableInfo.addField(field);
+                    builder.addField(field);
                 });
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-            tableInfo.processTable();
+            return builder.build();
         }
     }
 
