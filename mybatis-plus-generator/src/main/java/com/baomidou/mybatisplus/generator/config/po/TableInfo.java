@@ -210,7 +210,7 @@ public class TableInfo {
             return this.processFileName().convert().importPackage();
         }
 
-        public Builder processFileName() {
+        private Builder processFileName() {
             String entityName = entity.getNameConvert().entityNameConvert(this.tableInfo);
             this.tableInfo.entityName = (this.getFileName(entityName, globalConfig.getEntityName(), () -> entity.getConverterFileName().convert(entityName)));
             this.tableInfo.mapperName = this.getFileName(entityName, globalConfig.getMapperName(), () -> strategyConfig.mapper().getConverterMapperFileName().convert(entityName));
@@ -280,6 +280,7 @@ public class TableInfo {
                 }
                 if (field.isKeyFlag()) {
                     // 主键
+                    // TODO 这里好像存在问题
                     if (field.isConvert() || field.isKeyIdentityFlag()) {
                         this.tableInfo.importPackages.add(TableId.class.getCanonicalName());
                     }

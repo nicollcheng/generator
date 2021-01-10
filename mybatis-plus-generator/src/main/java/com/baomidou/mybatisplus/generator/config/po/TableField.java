@@ -66,13 +66,7 @@ public class TableField {
      */
     private Map<String, Object> customMap;
 
-    private final StrategyConfig strategyConfig;
-
     private final Entity entity;
-
-    private final DataSourceConfig dataSourceConfig;
-
-    private final GlobalConfig globalConfig;
 
     /**
      * 构造方法
@@ -81,85 +75,12 @@ public class TableField {
      * @param name          数据库字段名称
      * @since 3.5.0
      */
-    public TableField(@NotNull ConfigBuilder configBuilder, @NotNull String name) {
+    private TableField(@NotNull ConfigBuilder configBuilder, @NotNull String name) {
         this.name = name;
         this.columnName = name;
-        this.strategyConfig = configBuilder.getStrategyConfig();
         this.entity = configBuilder.getStrategyConfig().entity();
-        this.dataSourceConfig = configBuilder.getDataSourceConfig();
-        this.globalConfig = configBuilder.getGlobalConfig();
     }
 
-    /**
-     * @param convert
-     * @return this
-     * @see #setConvert()
-     * @deprecated 3.5.0
-     */
-    @Deprecated
-    public TableField setConvert(boolean convert) {
-        this.convert = convert;
-        return this;
-    }
-
-    /**
-     * @return this
-     */
-    @Deprecated
-    protected TableField setConvert() {
-        if (entity.isTableFieldAnnotationEnable() || isKeyWords()) {
-            this.convert = true;
-            return this;
-        }
-        if (strategyConfig.isCapitalModeNaming(name)) {
-            this.convert = !name.equalsIgnoreCase(propertyName);
-        } else {
-            // 转换字段
-            if (NamingStrategy.underline_to_camel == entity.getColumnNaming()) {
-                // 包含大写处理
-                if (StringUtils.containsUpperCase(name)) {
-                    this.convert = true;
-                }
-            } else if (!name.equals(propertyName)) {
-                this.convert = true;
-            }
-        }
-        return this;
-    }
-
-    /**
-     * 设置属性名称
-     *
-     * @param propertyName 属性名
-     * @param columnType   字段类型
-     * @return this
-     * @since 3.5.0
-     */
-    //TODO 待调整.
-    public TableField setPropertyName(@NotNull String propertyName, @NotNull IColumnType columnType) {
-        this.columnType = columnType;
-        if (entity.isBooleanColumnRemoveIsPrefix()
-            && "boolean".equalsIgnoreCase(this.getPropertyType()) && propertyName.startsWith("is")) {
-            this.convert = true;
-            this.propertyName = StringUtils.removePrefixAfterPrefixToLower(propertyName, 2);
-            return this;
-        }
-        this.propertyName = propertyName;
-        //TODO 先放置在这里调用
-        this.setConvert();
-        return this;
-    }
-
-    /**
-     * @param columnType 字段类型
-     * @return this
-     * @deprecated 3.5.0 {@link #setPropertyName(String, IColumnType)}
-     */
-    @Deprecated
-    public TableField setColumnType(@NotNull IColumnType columnType) {
-        this.columnType = columnType;
-        return this;
-    }
 
     public String getPropertyType() {
         if (null != columnType) {
@@ -228,102 +149,6 @@ public class TableField {
             || StringUtils.isNotBlank(columnName) && this.name.equalsIgnoreCase(columnName);
     }
 
-    /**
-     * @param keyFlag 主键标识
-     * @return this
-     * @see #primaryKey(boolean)
-     * @deprecated 3.5.0
-     */
-    @Deprecated
-    public TableField setKeyFlag(boolean keyFlag) {
-        this.keyFlag = keyFlag;
-        return this;
-    }
-
-    /**
-     * 主键自增标志
-     *
-     * @param keyIdentityFlag 自增标志
-     * @return this
-     * @see #primaryKey(boolean)
-     * @deprecated 3.5.0
-     */
-    @Deprecated
-    public TableField setKeyIdentityFlag(boolean keyIdentityFlag) {
-        this.keyIdentityFlag = keyIdentityFlag;
-        return this;
-    }
-
-    /**
-     * 设置主键
-     *
-     * @param autoIncrement 自增标识
-     * @return this
-     * @since 3.5.0
-     */
-    public TableField primaryKey(boolean autoIncrement) {
-        this.keyFlag = true;
-        this.keyIdentityFlag = autoIncrement;
-        return this;
-    }
-
-    /**
-     * @param fill 填充策略
-     * @return this
-     * @see #TableField(ConfigBuilder, String)
-     * @deprecated 3.5.0
-     */
-    @Deprecated
-    public TableField setFill(String fill) {
-        this.fill = fill;
-        return this;
-    }
-
-    /**
-     * 设置数据库字段名
-     *
-     * @param name 数据库字段名
-     * @see #TableField(ConfigBuilder, String)
-     * @deprecated 3.5.0
-     */
-    @Deprecated
-    public TableField setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public TableField setType(String type) {
-        this.type = type;
-        return this;
-    }
-
-    public TableField setComment(String comment) {
-        //TODO 暂时挪动到这
-        this.comment = this.globalConfig.isSwagger2()
-            && StringUtils.isNotBlank(comment) ? comment.replace("\"", "\\\"") : comment;
-        return this;
-    }
-
-    @Deprecated
-    public TableField setKeyWords(boolean keyWords) {
-        this.keyWords = keyWords;
-        return this;
-    }
-
-    public TableField setColumnName(String columnName) {
-        this.columnName = columnName;
-        IKeyWordsHandler keyWordsHandler = dataSourceConfig.getKeyWordsHandler();
-        if (keyWordsHandler != null && keyWordsHandler.isKeyWords(columnName)) {
-            this.keyWords = true;
-            this.columnName = keyWordsHandler.formatColumn(columnName);
-        }
-        return this;
-    }
-
-    public TableField setCustomMap(Map<String, Object> customMap) {
-        this.customMap = customMap;
-        return this;
-    }
 
     public boolean isConvert() {
         return convert;
@@ -346,10 +171,6 @@ public class TableField {
     }
 
     public String getPropertyName() {
-        if (StringUtils.isBlank(propertyName)) {
-            this.setPropertyName(entity.getNameConvert().propertyNameConvert(this),
-                dataSourceConfig.getTypeConvert().processTypeConvert(this.globalConfig, this));
-        }
         return propertyName;
     }
 
@@ -362,13 +183,6 @@ public class TableField {
     }
 
     public String getFill() {
-        if (StringUtils.isBlank(fill)) {
-            entity.getTableFillList().stream()
-                //忽略大写字段问题
-                .filter(tf -> tf instanceof Column && tf.getName().equalsIgnoreCase(name)
-                    || tf instanceof Property && tf.getName().equals(propertyName))
-                .findFirst().ifPresent(tf -> this.fill = tf.getFieldFill().name());
-        }
         return fill;
     }
 
@@ -382,5 +196,118 @@ public class TableField {
 
     public Map<String, Object> getCustomMap() {
         return customMap;
+    }
+    
+    public static class Builder {
+        
+        private final GlobalConfig globalConfig;
+        
+        private final DataSourceConfig dataSourceConfig;
+        
+        private final StrategyConfig strategyConfig;
+    
+        private final TableField tableField;
+        
+        private final Entity entity;
+    
+        public Builder(@NotNull ConfigBuilder configBuilder, @NotNull String name) {
+            this.globalConfig = configBuilder.getGlobalConfig();
+            this.strategyConfig = configBuilder.getStrategyConfig();
+            this.dataSourceConfig = configBuilder.getDataSourceConfig();
+            this.entity = configBuilder.getStrategyConfig().entity();
+            this.tableField = new TableField(configBuilder, name);
+            this.tableField.name = name;
+            this.tableField.columnName = name;
+        }
+        
+        public Builder comment(String comment){
+            this.tableField.comment =  this.globalConfig.isSwagger2()
+                && StringUtils.isNotBlank(comment) ? comment.replace("\"", "\\\"") : comment;
+            return this;
+        }
+    
+        public Builder type(String type) {
+            this.tableField.type = type;
+            this.tableField.columnType = dataSourceConfig.getTypeConvert().processTypeConvert(this.globalConfig, this.tableField);
+            return this;
+        }
+    
+        public Builder fill(String fill) {
+            this.tableField.fill = fill;
+            return this;
+        }
+        
+        public Builder propertyName(String propertyName){
+            if (entity.isBooleanColumnRemoveIsPrefix()
+                && "boolean".equalsIgnoreCase(this.tableField.getPropertyType()) && this.tableField.propertyName.startsWith("is")) {
+                this.tableField.convert = true;
+                this.tableField.propertyName = StringUtils.removePrefixAfterPrefixToLower(this.tableField.propertyName, 2);
+            }
+            this.tableField.propertyName = propertyName;
+            return this;
+        }
+        
+        public Builder columnName(String columnName){
+            this.tableField.columnName = columnName;
+            return this;
+        }
+        
+        public Builder primaryKey(boolean isPrimary, boolean autoIncrement){
+            this.tableField.keyFlag = isPrimary;
+            this.tableField.keyIdentityFlag = autoIncrement;
+            return this;
+        }
+        
+        public Builder customMap(Map<String,Object> customMap){
+            this.tableField.customMap = customMap;
+            return this;
+        }
+    
+        public TableField build() {
+            if(StringUtils.isBlank(this.tableField.propertyName)){
+                this.tableField.propertyName = entity.getNameConvert().propertyNameConvert(this.tableField);
+            }
+            this.entity.getTableFillList().stream()
+                //忽略大写字段问题
+                .filter(tf -> tf instanceof Column && tf.getName().equalsIgnoreCase(this.tableField.name)
+                    || tf instanceof Property && tf.getName().equals(this.tableField.propertyName))
+                .findFirst().ifPresent(tf -> this.tableField.fill = tf.getFieldFill().name());
+            return this.keywords().convert();
+        }
+    
+        private TableField convert() {
+            if (entity.isTableFieldAnnotationEnable() || this.tableField.keyWords) {
+                this.tableField.convert = true;
+                return this.tableField;
+            }
+            if (entity.isBooleanColumnRemoveIsPrefix()
+                && "boolean".equalsIgnoreCase(this.tableField.getPropertyType()) && this.tableField.propertyName.startsWith("is")) {
+                this.tableField.convert = true;
+            }
+            if (strategyConfig.isCapitalModeNaming(this.tableField.name)) {
+                this.tableField.convert = !this.tableField.name.equalsIgnoreCase(this.tableField.propertyName);
+            } else {
+                // 转换字段
+                if (NamingStrategy.underline_to_camel == entity.getColumnNaming()) {
+                    // 包含大写处理
+                    if (StringUtils.containsUpperCase(this.tableField.name)) {
+                        this.tableField.convert = true;
+                    }
+                } else if (!this.tableField.name.equals(this.tableField.propertyName)) {
+                    this.tableField.convert = true;
+                }
+            }
+            return this.tableField;
+        }
+        
+        private Builder keywords(){
+            DataSourceConfig dataSourceConfig = this.dataSourceConfig;
+            IKeyWordsHandler keyWordsHandler = dataSourceConfig.getKeyWordsHandler();
+            if (keyWordsHandler != null && keyWordsHandler.isKeyWords(this.tableField.name)) {
+                this.tableField.keyWords = true;
+                this.tableField.columnName = keyWordsHandler.formatColumn(this.tableField.name);
+            }
+            return this;
+        }
     }
 }

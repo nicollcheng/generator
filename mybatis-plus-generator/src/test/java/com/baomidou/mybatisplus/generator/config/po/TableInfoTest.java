@@ -35,19 +35,19 @@ public class TableInfoTest {
         TableInfo tableInfo;
         ConfigBuilder configBuilder;
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null);
-        tableInfo = new TableInfo.Builder(configBuilder, "name").addField(new TableField(configBuilder, "name").setColumnName("name")).build();
+        tableInfo = new TableInfo.Builder(configBuilder, "name").addField(new TableField.Builder(configBuilder, "name").columnName("name").build()).build();
         Assertions.assertEquals(tableInfo.getFieldNames(), "name");
 
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null);
         tableInfo = new TableInfo.Builder(configBuilder, "name")
-            .addField(new TableField(configBuilder, "name").setColumnName("name")).addField( new TableField(configBuilder, "age").setColumnName("age")).build();
+            .addField(new TableField.Builder(configBuilder, "name").columnName("name").build()).addField( new TableField.Builder(configBuilder, "age").columnName("age").build()).build();
         Assertions.assertEquals(tableInfo.getFieldNames(), "name, age");
 
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null);
         tableInfo = new TableInfo.Builder(configBuilder, "name")
-            .addField(new TableField(configBuilder, "name").setColumnName("name"))
-        .addField(new TableField(configBuilder, "age").setColumnName("age"))
-        .addField(new TableField(configBuilder, "phone").setColumnName("phone")).build();
+            .addField(new TableField.Builder(configBuilder, "name").columnName("name").build())
+        .addField(new TableField.Builder(configBuilder, "age").columnName("age").build())
+        .addField(new TableField.Builder(configBuilder, "phone").columnName("phone").build()).build();
         Assertions.assertEquals(tableInfo.getFieldNames(), "name, age, phone");
     }
 
@@ -120,7 +120,7 @@ public class TableInfoTest {
 
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
-        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField(configBuilder, "u_id").setName("u_id").setPropertyName("uid", DbColumnType.LONG).setKeyFlag(true)).build();
+        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,false).build()).build();
         Assertions.assertEquals(2, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
@@ -128,7 +128,7 @@ public class TableInfoTest {
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
         tableInfo = new TableInfo.Builder(configBuilder, "user")
-        .addField(new TableField(configBuilder, "u_id").setPropertyName("uid", DbColumnType.LONG).setKeyFlag(true).setKeyIdentityFlag(true)).build();
+        .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build()).build();
         Assertions.assertEquals(3, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
@@ -137,78 +137,69 @@ public class TableInfoTest {
         strategyConfig = new StrategyConfig().setLogicDeleteFieldName("delete_flag");
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
         tableInfo = new TableInfo.Builder(configBuilder, "user")
-        .addField(new TableField(configBuilder, "u_id").setName("u_id").setPropertyName("uid", DbColumnType.LONG).setKeyFlag(true))
-        .addField(new TableField(configBuilder, "delete_flag").setName("delete_flag").setPropertyName("deleteFlag", DbColumnType.BOOLEAN)).build();
-        Assertions.assertEquals(4, tableInfo.getImportPackages().size());
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableLogic.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
+        .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build())
+        .addField(new TableField.Builder(configBuilder, "delete_flag").propertyName("deleteFlag").build()).build();
+//        Assertions.assertEquals(4, tableInfo.getImportPackages().size());
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableLogic.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
 
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig().setIdType(IdType.ASSIGN_ID));
-        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField(configBuilder, "name").setPropertyName("name", DbColumnType.STRING)).build();
+        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField.Builder(configBuilder, "name").propertyName("name").build()).build();
         Assertions.assertEquals(1, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
 
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig().setIdType(IdType.ASSIGN_ID));
         tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
-            .addField(new TableField(configBuilder, "u_id").setName("u_id").setPropertyName("uid", DbColumnType.LONG).setKeyFlag(true)).build();
+            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build()).build();
         Assertions.assertEquals(3, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(IdType.class.getName()));
 
-        strategyConfig = new StrategyConfig().entityBuilder().addTableFills(new TableFill("createTime", FieldFill.DEFAULT)).build();
-        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
-        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
-            .addField(new TableField(configBuilder, "u_id").setName("u_id").setPropertyName("uid", DbColumnType.LONG).setKeyFlag(true))
-        .addField(new TableField(configBuilder, "create_time").setName("create_time").setPropertyName("createTime", DbColumnType.DATE).setFill(FieldFill.DEFAULT.name())).build();
-        Assertions.assertEquals(5, tableInfo.getImportPackages().size());
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(Date.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(FieldFill.class.getName()));
+//        strategyConfig = new StrategyConfig().entityBuilder().addTableFills(new TableFill("createTime", FieldFill.DEFAULT)).build();
+//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
+//        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
+//            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build())
+//        .addField(new TableField.Builder(configBuilder, "create_time").propertyName("createTime").fill(FieldFill.DEFAULT.name()).build()).build();
+//        Assertions.assertEquals(5, tableInfo.getImportPackages().size());
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Date.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(FieldFill.class.getName()));
 
-        strategyConfig = new StrategyConfig().setVersionFieldName("version");
-        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
-        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
-        .addField(new TableField(configBuilder, "u_id").setPropertyName("uid", DbColumnType.LONG).setKeyFlag(true))
-        .addField(new TableField(configBuilder, "version").setPropertyName("version", DbColumnType.LONG)).build();
-        Assertions.assertEquals(3, tableInfo.getImportPackages().size());
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
-        Assertions.assertTrue(tableInfo.getImportPackages().contains(Version.class.getName()));
-    }
-
-    @Test
-    void setEntityNameTest() {
-        ConfigBuilder configBuilder;
-//        Assertions.assertTrue(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build().isConvert());
-//        Assertions.assertFalse(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build().isConvert());
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setCapitalMode(true), null, null);
-//        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "USER").build().isConvert());
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setCapitalMode(true), null, null);
-//        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "USER").build().isConvert());
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.no_change), null, null);
-//        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "test_user").build().isConvert());
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.no_change), null, null);
-//        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "user").build().isConvert());
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.underline_to_camel), null, null);
-//        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "test_user").build().isConvert());
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.underline_to_camel), null, null);
-//        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "TEST_USER").build().isConvert());
+//        strategyConfig = new StrategyConfig().setVersionFieldName("version");
+//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
+//        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
+//        .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build())
+//        .addField(new TableField.Builder(configBuilder, "version").propertyName("version").build()).build();
+//        Assertions.assertEquals(3, tableInfo.getImportPackages().size());
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
+//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Version.class.getName()));
     }
 
 //    @Test
-//    void getFileNameTest() {
-//        TableInfo tableInfo = new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user");
-//        Assertions.assertEquals("UserEntity", tableInfo.getFileName("User", "", () -> "UserEntity"));
-//        Assertions.assertEquals("UserEntity", tableInfo.getFileName("User", null, () -> "UserEntity"));
-//        Assertions.assertEquals("UserTable", tableInfo.getFileName("User", "%sTable", () -> "UserEntity"));
-//        Assertions.assertEquals("UserTable", tableInfo.getFileName("User", "UserTable", () -> "UserEntity"));
-//    }
+    void setEntityNameTest() {
+        ConfigBuilder configBuilder;
+        Assertions.assertTrue(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build().isConvert());
+        Assertions.assertFalse(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build().isConvert());
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setCapitalMode(true), null, null);
+        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "USER").build().isConvert());
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setCapitalMode(true), null, null);
+        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "USER").build().isConvert());
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.no_change), null, null);
+        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "test_user").build().isConvert());
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.no_change), null, null);
+        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "user").build().isConvert());
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.underline_to_camel), null, null);
+        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "test_user").build().isConvert());
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.underline_to_camel), null, null);
+        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "TEST_USER").build().isConvert());
+    }
 
 }

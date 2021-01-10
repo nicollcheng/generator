@@ -169,22 +169,23 @@ public abstract class IDatabaseQuery {
                 Entity entity = strategyConfig.entity();
                 dbQuery.query(tableFieldsSql, result -> {
                     String columnName = result.getStringResult(dbQuery.fieldName());
-                    TableField field = new TableField(this.configBuilder, columnName);
+                    TableField.Builder fieldBuilder = new TableField.Builder(this.configBuilder, columnName);
                     // 避免多重主键设置，目前只取第一个找到ID，并放到list中的索引为0的位置
                     boolean isId = DbType.H2 == dbType ? h2PkColumns.contains(columnName) : result.isPrimaryKey();
                     // 处理ID
                     if (isId) {
-                        field.primaryKey(dbQuery.isKeyIdentity(result.getResultSet()));
+                        fieldBuilder.primaryKey(true, dbQuery.isKeyIdentity(result.getResultSet()));
                         builder.havePrimaryKey(true);
-                        if (field.isKeyIdentityFlag() && (entity.getIdType() != null || globalConfig.getIdType() != null)) {
-                            LOGGER.warn("当前表[{}]的主键为自增主键，会导致全局主键的ID类型设置失效!", tableName);
-                        }
                     }
-                    field.setColumnName(columnName)
-                        .setType(result.getStringResult(dbQuery.fieldType()))
-                        .setComment(result.getFiledComment())
-                        .setCustomMap(dbQuery.getCustomFields(result.getResultSet()));
-                    builder.addField(field);
+                    fieldBuilder
+                        .type(result.getStringResult(dbQuery.fieldType()))
+                        .comment(result.getFiledComment())
+                        .customMap(dbQuery.getCustomFields(result.getResultSet()));
+                    TableField tableField = fieldBuilder.build();
+                    if (tableField.isKeyIdentityFlag() && (entity.getIdType() != null || globalConfig.getIdType() != null)) {
+                        LOGGER.warn("当前表[{}]的主键为自增主键，会导致全局主键的ID类型设置失效!", tableName);
+                    }
+                    builder.addField(tableField);
                 });
             } catch (SQLException e) {
                 throw new RuntimeException(e);
