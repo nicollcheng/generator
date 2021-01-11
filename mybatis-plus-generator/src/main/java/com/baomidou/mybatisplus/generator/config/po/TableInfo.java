@@ -17,6 +17,7 @@ package com.baomidou.mybatisplus.generator.config.po;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -173,6 +174,8 @@ public class TableInfo {
 
         private final StrategyConfig strategyConfig;
 
+        private Boolean convert;
+
         public Builder(@NotNull ConfigBuilder configBuilder, @NotNull String name) {
             this.tableInfo = new TableInfo(name);
             this.strategyConfig = configBuilder.getStrategyConfig();
@@ -201,17 +204,27 @@ public class TableInfo {
             return this;
         }
 
-//        public Builder addImportPackages(@NotNull String... pkgs){
-//            this.tableInfo.importPackages.addAll(Arrays.asList(pkgs));
-//            return this;
-//        }
+        public Builder convert(boolean convert) {
+            this.convert = convert;
+            return this;
+        }
+
+        public Builder addImportPackages(@NotNull String... pkgs){
+            this.tableInfo.importPackages.addAll(Arrays.asList(pkgs));
+            return this;
+        }
+
+        public Builder entityName(String entityName){
+            this.tableInfo.entityName = entityName;
+            return this;
+        }
 
         public TableInfo build() {
             return this.processFileName().convert().importPackage();
         }
 
         private Builder processFileName() {
-            String entityName = entity.getNameConvert().entityNameConvert(this.tableInfo);
+            String entityName = StringUtils.isBlank(this.tableInfo.entityName) ? entity.getNameConvert().entityNameConvert(this.tableInfo) : this.tableInfo.entityName;
             this.tableInfo.entityName = (this.getFileName(entityName, globalConfig.getEntityName(), () -> entity.getConverterFileName().convert(entityName)));
             this.tableInfo.mapperName = this.getFileName(entityName, globalConfig.getMapperName(), () -> strategyConfig.mapper().getConverterMapperFileName().convert(entityName));
             this.tableInfo.xmlName = this.getFileName(entityName, globalConfig.getXmlName(), () -> strategyConfig.mapper().getConverterXmlFileName().convert(entityName));
@@ -227,6 +240,11 @@ public class TableInfo {
 
         private Builder convert() {
             String tableName = this.tableInfo.name;
+            if (this.convert != null) {
+                // fast return
+                this.tableInfo.convert = convert;
+                return this;
+            }
             if (this.strategyConfig.startsWithTablePrefix(tableName) || this.entity.isTableFieldAnnotationEnable()) {
                 // 包含前缀
                 this.tableInfo.convert = true;

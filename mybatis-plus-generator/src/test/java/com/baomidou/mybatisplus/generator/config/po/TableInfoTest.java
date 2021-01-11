@@ -101,10 +101,10 @@ public class TableInfoTest {
         Assertions.assertEquals(1, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
 
-//        tableInfo = new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build();
-//        Assertions.assertEquals(2, tableInfo.getImportPackages().size());
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableName.class.getName()));
+        tableInfo = new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").convert(true).build();
+        Assertions.assertEquals(2, tableInfo.getImportPackages().size());
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableName.class.getName()));
 
         strategyConfig = new StrategyConfig().setSuperEntityClass("con.baomihua.demo.SuperEntity");
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, null);
@@ -183,23 +183,23 @@ public class TableInfoTest {
 //        Assertions.assertTrue(tableInfo.getImportPackages().contains(Version.class.getName()));
     }
 
-//    @Test
+    @Test
     void setEntityNameTest() {
         ConfigBuilder configBuilder;
-        Assertions.assertTrue(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build().isConvert());
-        Assertions.assertFalse(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").build().isConvert());
+        Assertions.assertTrue(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").entityName("UserEntity").build().isConvert());
+        Assertions.assertFalse(new TableInfo.Builder(new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null), "user").entityName("User").build().isConvert());
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setCapitalMode(true), null, null);
-        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "USER").build().isConvert());
+        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "USER").entityName("User").build().isConvert());
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setCapitalMode(true), null, null);
-        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "USER").build().isConvert());
+        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "USER").entityName("UserEntity").build().isConvert());
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.no_change), null, null);
-        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "test_user").build().isConvert());
+        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "test_user").entityName("TestUser").build().isConvert());
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.no_change), null, null);
-        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "user").build().isConvert());
+        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "user").entityName("User").build().isConvert());
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.underline_to_camel), null, null);
-        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "test_user").build().isConvert());
+        Assertions.assertFalse(new TableInfo.Builder(configBuilder, "test_user").entityName("TestUser").build().isConvert());
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig().setNaming(NamingStrategy.underline_to_camel), null, null);
-        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "TEST_USER").build().isConvert());
+        Assertions.assertTrue(new TableInfo.Builder(configBuilder, "TEST_USER").entityName("TestUser").build().isConvert());
     }
 
 }
