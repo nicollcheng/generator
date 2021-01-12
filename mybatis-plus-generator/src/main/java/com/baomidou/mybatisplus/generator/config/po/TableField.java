@@ -197,19 +197,19 @@ public class TableField {
     public Map<String, Object> getCustomMap() {
         return customMap;
     }
-    
+
     public static class Builder {
-        
+
         private final GlobalConfig globalConfig;
-        
+
         private final DataSourceConfig dataSourceConfig;
-        
+
         private final StrategyConfig strategyConfig;
-    
+
         private final TableField tableField;
-        
+
         private final Entity entity;
-    
+
         public Builder(@NotNull ConfigBuilder configBuilder, @NotNull String name) {
             this.globalConfig = configBuilder.getGlobalConfig();
             this.strategyConfig = configBuilder.getStrategyConfig();
@@ -219,50 +219,51 @@ public class TableField {
             this.tableField.name = name;
             this.tableField.columnName = name;
         }
-        
+
         public Builder comment(String comment){
             this.tableField.comment =  this.globalConfig.isSwagger2()
                 && StringUtils.isNotBlank(comment) ? comment.replace("\"", "\\\"") : comment;
             return this;
         }
-    
+
         public Builder type(String type) {
             this.tableField.type = type;
             this.tableField.columnType = dataSourceConfig.getTypeConvert().processTypeConvert(this.globalConfig, this.tableField);
             return this;
         }
-    
+
         public Builder fill(String fill) {
             this.tableField.fill = fill;
             return this;
         }
-        
-        public Builder propertyName(String propertyName){
-            if (entity.isBooleanColumnRemoveIsPrefix()
-                && "boolean".equalsIgnoreCase(this.tableField.getPropertyType()) && this.tableField.propertyName.startsWith("is")) {
-                this.tableField.convert = true;
-                this.tableField.propertyName = StringUtils.removePrefixAfterPrefixToLower(this.tableField.propertyName, 2);
-            }
+
+        public Builder propertyName(@NotNull String propertyName, @NotNull IColumnType columnType) {
+            this.tableField.columnType = columnType;
             this.tableField.propertyName = propertyName;
+            if (entity.isBooleanColumnRemoveIsPrefix()
+                && "boolean".equalsIgnoreCase(columnType.getType()) && propertyName.startsWith("is")) {
+                this.tableField.convert = true;
+                this.tableField.propertyName = StringUtils.removePrefixAfterPrefixToLower(propertyName, 2);
+            }
             return this;
         }
-        
+
         public Builder columnName(String columnName){
             this.tableField.columnName = columnName;
             return this;
         }
-        
+
         public Builder primaryKey(boolean isPrimary, boolean autoIncrement){
             this.tableField.keyFlag = isPrimary;
             this.tableField.keyIdentityFlag = autoIncrement;
             return this;
         }
-        
+
         public Builder customMap(Map<String,Object> customMap){
             this.tableField.customMap = customMap;
             return this;
         }
-    
+
         public TableField build() {
             if(StringUtils.isBlank(this.tableField.propertyName)){
                 this.tableField.propertyName = entity.getNameConvert().propertyNameConvert(this.tableField);
@@ -274,7 +275,7 @@ public class TableField {
                 .findFirst().ifPresent(tf -> this.tableField.fill = tf.getFieldFill().name());
             return this.keywords().convert();
         }
-    
+
         private TableField convert() {
             if (entity.isTableFieldAnnotationEnable() || this.tableField.keyWords) {
                 this.tableField.convert = true;
@@ -299,7 +300,7 @@ public class TableField {
             }
             return this.tableField;
         }
-        
+
         private Builder keywords(){
             DataSourceConfig dataSourceConfig = this.dataSourceConfig;
             IKeyWordsHandler keyWordsHandler = dataSourceConfig.getKeyWordsHandler();

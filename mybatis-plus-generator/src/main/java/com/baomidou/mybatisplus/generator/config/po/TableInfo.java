@@ -98,7 +98,6 @@ public class TableInfo {
      * 转换filed实体为 xml mapper 中的 base column 字符串信息
      */
     public String getFieldNames() {
-        //TODO 感觉这个也啥必要,不打算公开set方法了
         if (StringUtils.isBlank(fieldNames)) {
             this.fieldNames = this.fields.stream().map(TableField::getColumnName).collect(Collectors.joining(", "));
         }

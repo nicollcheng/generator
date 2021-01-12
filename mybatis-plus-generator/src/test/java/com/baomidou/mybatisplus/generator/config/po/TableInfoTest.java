@@ -40,14 +40,14 @@ public class TableInfoTest {
 
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null);
         tableInfo = new TableInfo.Builder(configBuilder, "name")
-            .addField(new TableField.Builder(configBuilder, "name").columnName("name").build()).addField( new TableField.Builder(configBuilder, "age").columnName("age").build()).build();
+            .addField(new TableField.Builder(configBuilder, "name").columnName("name").build()).addField(new TableField.Builder(configBuilder, "age").columnName("age").build()).build();
         Assertions.assertEquals(tableInfo.getFieldNames(), "name, age");
 
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, new StrategyConfig(), null, null);
         tableInfo = new TableInfo.Builder(configBuilder, "name")
             .addField(new TableField.Builder(configBuilder, "name").columnName("name").build())
-        .addField(new TableField.Builder(configBuilder, "age").columnName("age").build())
-        .addField(new TableField.Builder(configBuilder, "phone").columnName("phone").build()).build();
+            .addField(new TableField.Builder(configBuilder, "age").columnName("age").build())
+            .addField(new TableField.Builder(configBuilder, "phone").columnName("phone").build()).build();
         Assertions.assertEquals(tableInfo.getFieldNames(), "name, age, phone");
     }
 
@@ -120,7 +120,7 @@ public class TableInfoTest {
 
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
-        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,false).build()).build();
+        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid", DbColumnType.LONG).primaryKey(true, false).build()).build();
         Assertions.assertEquals(2, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
@@ -128,7 +128,7 @@ public class TableInfoTest {
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
         tableInfo = new TableInfo.Builder(configBuilder, "user")
-        .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build()).build();
+            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid", DbColumnType.LONG).primaryKey(true, true).build()).build();
         Assertions.assertEquals(3, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
@@ -137,50 +137,50 @@ public class TableInfoTest {
         strategyConfig = new StrategyConfig().setLogicDeleteFieldName("delete_flag");
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
         tableInfo = new TableInfo.Builder(configBuilder, "user")
-        .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build())
-        .addField(new TableField.Builder(configBuilder, "delete_flag").propertyName("deleteFlag").build()).build();
-//        Assertions.assertEquals(4, tableInfo.getImportPackages().size());
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableLogic.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
+            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid", DbColumnType.LONG).primaryKey(true, false).build())
+            .addField(new TableField.Builder(configBuilder, "delete_flag").propertyName("deleteFlag", DbColumnType.BOOLEAN).build()).build();
+        Assertions.assertEquals(4, tableInfo.getImportPackages().size());
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableLogic.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
 
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig().setIdType(IdType.ASSIGN_ID));
-        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField.Builder(configBuilder, "name").propertyName("name").build()).build();
+        tableInfo = new TableInfo.Builder(configBuilder, "user").addField(new TableField.Builder(configBuilder, "name").propertyName("name", DbColumnType.STRING).build()).build();
         Assertions.assertEquals(1, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
 
         strategyConfig = new StrategyConfig();
         configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig().setIdType(IdType.ASSIGN_ID));
         tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
-            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build()).build();
+            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid", DbColumnType.LONG).primaryKey(true, false).build()).build();
         Assertions.assertEquals(3, tableInfo.getImportPackages().size());
         Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
         Assertions.assertTrue(tableInfo.getImportPackages().contains(IdType.class.getName()));
 
-//        strategyConfig = new StrategyConfig().entityBuilder().addTableFills(new TableFill("createTime", FieldFill.DEFAULT)).build();
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
-//        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
-//            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build())
-//        .addField(new TableField.Builder(configBuilder, "create_time").propertyName("createTime").fill(FieldFill.DEFAULT.name()).build()).build();
-//        Assertions.assertEquals(5, tableInfo.getImportPackages().size());
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Date.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(FieldFill.class.getName()));
+        strategyConfig = new StrategyConfig().entityBuilder().addTableFills(new TableFill("createTime", FieldFill.DEFAULT)).build();
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
+        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
+            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid", DbColumnType.LONG).primaryKey(true, false).build())
+            .addField(new TableField.Builder(configBuilder, "create_time").propertyName("createTime", DbColumnType.DATE).fill(FieldFill.DEFAULT.name()).build()).build();
+        Assertions.assertEquals(5, tableInfo.getImportPackages().size());
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(Date.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(com.baomidou.mybatisplus.annotation.TableField.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(FieldFill.class.getName()));
 
-//        strategyConfig = new StrategyConfig().setVersionFieldName("version");
-//        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
-//        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
-//        .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid").primaryKey(true,true).build())
-//        .addField(new TableField.Builder(configBuilder, "version").propertyName("version").build()).build();
-//        Assertions.assertEquals(3, tableInfo.getImportPackages().size());
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
-//        Assertions.assertTrue(tableInfo.getImportPackages().contains(Version.class.getName()));
+        strategyConfig = new StrategyConfig().setVersionFieldName("version");
+        configBuilder = new ConfigBuilder(new PackageConfig.Builder().build(), dataSourceConfig, strategyConfig, null, new GlobalConfig());
+        tableInfo = new TableInfo.Builder(configBuilder, "user").havePrimaryKey(true)
+            .addField(new TableField.Builder(configBuilder, "u_id").propertyName("uid", DbColumnType.LONG).primaryKey(true, false).build())
+            .addField(new TableField.Builder(configBuilder, "version").propertyName("version", DbColumnType.LONG).build()).build();
+        Assertions.assertEquals(3, tableInfo.getImportPackages().size());
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(Serializable.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(TableId.class.getName()));
+        Assertions.assertTrue(tableInfo.getImportPackages().contains(Version.class.getName()));
     }
 
     @Test
