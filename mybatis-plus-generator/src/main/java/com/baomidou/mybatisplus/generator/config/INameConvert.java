@@ -65,20 +65,28 @@ public interface INameConvert {
 
         @Override
         public @NotNull String entityNameConvert(@NotNull TableInfo tableInfo) {
-            return NamingStrategy.capitalFirst(processName(tableInfo.getName(), strategyConfig.entity().getNaming(), strategyConfig.getTablePrefix()));
+            return NamingStrategy.capitalFirst(processName(tableInfo.getName(), strategyConfig.entity().getNaming(), strategyConfig.getTablePrefix(), strategyConfig.getTablePrefix()));
         }
 
         @Override
         public @NotNull String propertyNameConvert(@NotNull TableField field) {
-            return processName(field.getName(), strategyConfig.entity().getColumnNaming(), strategyConfig.getFieldPrefix());
+            return processName(field.getName(), strategyConfig.entity().getColumnNaming(), strategyConfig.getFieldPrefix(), strategyConfig.getFieldSuffix());
         }
 
-        private String processName(String name, NamingStrategy strategy, Set<String> prefix) {
+        private String processName(String name, NamingStrategy strategy, Set<String> prefix, Set<String> suffix) {
             String propertyName;
             if (prefix.size() > 0) {
                 if (strategy == NamingStrategy.underline_to_camel) {
                     // 删除前缀、下划线转驼峰
-                    propertyName = NamingStrategy.removePrefixAndCamel(name, prefix);
+                    if (suffix != null && !suffix.isEmpty()){
+                        // 删除前缀
+                        propertyName = NamingStrategy.removePrefix(name, prefix);
+                        // 删除后缀、下划线转驼峰
+                        propertyName = NamingStrategy.removeSuffixAndCamel(propertyName, suffix);
+                    }else {
+                        // 删除前缀、下划线转驼峰
+                        propertyName = NamingStrategy.removePrefixAndCamel(name, prefix);
+                    }
                 } else {
                     // 删除前缀
                     propertyName = NamingStrategy.removePrefix(name, prefix);

@@ -99,4 +99,35 @@ public enum NamingStrategy {
         }
         return StringPool.EMPTY;
     }
+
+    /**
+     * 去掉下划线后缀且将前半部分转成驼峰格式
+     *
+     * @param name        ignore
+     * @param tableSuffix ignore
+     * @return ignore
+     */
+    public static String removeSuffixAndCamel(String name, Set<String> tableSuffix) {
+        return underlineToCamel(removeSuffix(name, tableSuffix));
+    }
+    /**
+     * 去掉指定的后缀
+     *
+     * @param name   ignore
+     * @param suffixes ignore
+     * @return ignore
+     */
+    private static String removeSuffix(String name, Set<String> suffixes) {
+        if (StringUtils.isBlank(name)) {
+            return StringPool.EMPTY;
+        }
+        if (null != suffixes) {
+            // 判断是否有匹配的后缀，然后截取后缀
+            // 删除后缀
+            return suffixes.stream().filter(suffix -> name.toLowerCase()
+                .endsWith(suffix.toLowerCase()))
+                .findFirst().map(suffix -> name.substring(0, name.length() - suffix.length())).orElse(name);
+        }
+        return name;
+    }
 }

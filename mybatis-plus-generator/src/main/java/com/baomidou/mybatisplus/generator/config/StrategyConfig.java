@@ -15,19 +15,19 @@
  */
 package com.baomidou.mybatisplus.generator.config;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import com.baomidou.mybatisplus.generator.config.builder.*;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.generator.config.builder.BaseBuilder;
+import com.baomidou.mybatisplus.generator.config.builder.Controller;
+import com.baomidou.mybatisplus.generator.config.builder.Entity;
+import com.baomidou.mybatisplus.generator.config.builder.Mapper;
+import com.baomidou.mybatisplus.generator.config.builder.Service;
+import com.baomidou.mybatisplus.generator.config.po.LikeTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.generator.IFill;
-import com.baomidou.mybatisplus.generator.config.po.LikeTable;
-import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 策略配置项
@@ -49,9 +49,17 @@ public class StrategyConfig {
      */
     private final Set<String> tablePrefix = new HashSet<>();
     /**
+     * 表后缀
+     */
+    private final Set<String> tableSuffix = new HashSet<>();
+    /**
      * 字段前缀
      */
     private final Set<String> fieldPrefix = new HashSet<>();
+    /**
+     * 字段后缀
+     */
+    private final Set<String> fieldSuffix = new HashSet<>();
     /**
      * 需要包含的表名，允许正则表达式（与exclude二选一配置）<br/>
      * 当{@link #enableSqlFilter}为true时，正则表达式无效.
@@ -297,6 +305,10 @@ public class StrategyConfig {
     public Set<String> getFieldPrefix() {
         return fieldPrefix;
     }
+    @NotNull
+    public Set<String> getFieldSuffix() {
+        return fieldSuffix;
+    }
 
     @NotNull
     public Set<String> getInclude() {
@@ -425,6 +437,17 @@ public class StrategyConfig {
          */
         public Builder addTablePrefix(@NotNull String... tablePrefix) {
             this.strategyConfig.tablePrefix.addAll(Arrays.asList(tablePrefix));
+            return this;
+        }
+        /**
+         * 增加表前缀
+         *
+         * @param tableSuffix 表前缀
+         * @return this
+         * @since 3.5.0
+         */
+        public Builder addTableSuffix(@NotNull String... tableSuffix) {
+            this.strategyConfig.tableSuffix.addAll(Arrays.asList(tableSuffix));
             return this;
         }
 
